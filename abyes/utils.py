@@ -1,8 +1,6 @@
-import numpy as np
-
 def check_size(x, dim):
     if not len(x)==dim:
-        raise Exception("The data should be a two-dimensional array")
+        raise Exception('The data should be a two-dimensional array')
     else:
         return
 
@@ -11,16 +9,40 @@ def print_result(result):
 
     msg = ''
     if result == 1:
-        msg = "Result is conclusive: B variant is winner!"
+        l = 50
+        print()
+        msg = 'Result is conclusive: B variant is winner!'
     elif result == -1:
-        msg = "Result is conclusive: A variant is winner!"
+        l = 50
+        print()
+        msg = '* Result is conclusive: A variant is winner!'
     elif result == 0:
-        msg = "Result is conclusive: A and B variants are effectively equivalent!"
+        l = 100
+        print()
+        msg = '* Result is conclusive: A and B variants are effectively equivalent!'
     else:
         if(type(result)==list and len(result)==2):
             print_result(result[0])
             print_result(result[1])
         else:
-            msg = "Result is inconclusive."
+            l = 20
+            print()
+            msg = 'Result is inconclusive.'
 
     print(msg)
+    print()
+    print('-'*l)
+
+
+def print_info(info):
+    print()
+    print('*** ABYES ***')
+    print()
+    print('Method = %s' % info.method)
+    print('Decision Rule = %s' % info.rule)
+    if info.rule== 'rope':
+        print('Alpa = %s' % info.alpha)
+        print('Rope = %s' % str(info.rope))
+    elif info.rule== 'loss':
+        print('Threshold of Caring = %s' % info.toc)
+
