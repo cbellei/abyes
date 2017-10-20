@@ -30,7 +30,7 @@ def print_result(result):
 
 def print_info(info):
     print()
-    print('*** ABYES ***')
+    print('*** abyes ***')
     print()
     print('Method = %s' % info.method)
     print('Decision Rule = %s' % info.rule)
