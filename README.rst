@@ -38,11 +38,11 @@ Example
 =======
 * In ipython, type::
 
-    import abyes
+    import abyes as ab
     import numpy as np
 
     data = [np.random.binomial(1, 0.5, size=10000), np.random.binomial(1, 0.3, size=10000)]
-    exp = abyes.AbExp(alpha=0.95, method='analytic', rule='loss')
+    exp = ab.AbExp(alpha=0.95, method='analytic', rule='loss')
     exp.experiment(data)
 
 * This will give the following result::
