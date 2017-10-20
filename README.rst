@@ -46,7 +46,7 @@ Threshold of Caring = 0.01
 * Result is conclusive: A variant is winner!
 `
 
-
-
 Licence
 =======
+`Apache License, Version
+2.0 <https://github.com/cbellei/abyes/blob/master/LICENSE>`__
