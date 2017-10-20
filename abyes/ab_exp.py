@@ -34,7 +34,8 @@ class AbExp:
     """
     def __init__(self, method='analytic', rule='rope',
                  alpha=0.95, alpha_prior=1, beta_prior=1,
-                 resolution=500, rope=(-0.1, 0.1), toc=1.e-2, plot=False):
+                 resolution=500, rope=(-0.1, 0.1), toc=1.e-2,
+                 iterations=5000, plot=False):
         self.method = method
         self.rule = rule
         self.alpha = alpha
@@ -44,6 +45,7 @@ class AbExp:
         self.rope = rope
         self.toc = toc
         self.data = np.array([])
+        self.iterations = iterations
         self.plot = plot
 
     def experiment(self, data):
@@ -171,7 +173,7 @@ class AbExp:
 
             start = pm.find_MAP()
             step = pm.Slice()
-            trace = pm.sample(10000, step=step, start=start)
+            trace = pm.sample(self.iterations, step=step, start=start)
 
         bins = np.linspace(0, 1, self.resolution)
         mua = np.histogram(trace['muA'][500:], bins=bins, normed=True)
@@ -248,24 +250,27 @@ class AbExp:
         elb = np.trapz(intb, dl)
 
         if self.plot:
-            plt.figure(figsize=(11, 7))
+            plt.figure(figsize=(9, 6))
             plt.subplot(1,2,1)
             b = posterior['muA'][1]
-            plt.plot(0.5*(b[0:-1]+b[1:]), posterior['muA'][0],lw=2,label='A')
+            plt.plot(0.5*(b[0:-1]+b[1:]), posterior['muA'][0], lw=2, label=r'$f(\mu_A)$')
             b = posterior['muB'][1]
-            plt.plot(0.5*(b[0:-1]+b[1:]), posterior['muB'][0],lw=2,label='B')
+            plt.plot(0.5*(b[0:-1]+b[1:]), posterior['muB'][0], lw=2, label=r'$f(\mu_B)$')
             plt.xlabel('$\mu_A,\  \mu_B$')
+            plt.xlim([0, 1])
             plt.title('Conversion Rate')
             plt.locator_params(nticks=6)
+            plt.gca().set_ylim(bottom=0)
             plt.legend()
 
             plt.subplot(1,2,2)
-            plt.plot(dl, fdl, 'b', lw=3, label=r'$\mu_B - \mu_A$')
+            plt.plot(dl, fdl, 'b', lw=3, label=r'$f(\mu_B - \mu_A)$')
             plt.plot([ela, ela], [0, 0.3*np.max(fdl)], 'r', lw=3, label='A: Expected Loss')
             plt.plot([elb, elb], [0, 0.3*np.max(fdl)], 'c', lw=3, label='B: Expected Loss')
             plt.plot([self.toc, self.toc], [0, 0.3*np.max(fdl)], 'k--', lw=3, label='Threshold of Caring')
             plt.xlabel(r'$\mu_B-\mu_A$')
             plt.title('Expected Loss')
+            plt.gca().set_ylim(bottom=0)
             plt.gca().locator_params(axis='x', numticks=6)
             plt.legend()
 
@@ -282,24 +287,27 @@ class AbExp:
 
     def plot_rope_posterior(self, index, k, x, posterior, var):
 
-        plt.figure(figsize=(11, 7))
+        plt.figure(figsize=(9, 6))
         plt.subplot(1, 2, 1)
         b = posterior['muA'][1]
-        plt.plot(0.5 * (b[0:-1] + b[1:]), posterior['muA'][0], lw=2, label='A')
+        plt.plot(0.5 * (b[0:-1] + b[1:]), posterior['muA'][0], lw=2, label=r'$f(\mu_A)$')
         b = posterior['muB'][1]
-        plt.plot(0.5 * (b[0:-1] + b[1:]), posterior['muB'][0], lw=2, label='B')
+        plt.plot(0.5 * (b[0:-1] + b[1:]), posterior['muB'][0], lw=2, label=r'$f(\mu_B)$')
         plt.xlabel('$\mu_A,\  \mu_B$')
+        plt.xlim([0,1])
         plt.title('Conversion Rate')
+        plt.gca().set_ylim(bottom=0)
         plt.locator_params(nticks=6)
         plt.legend()
 
         plt.subplot(1, 2, 2)
         pdf = posterior[var][0]
-        plt.plot(x[pdf >= k[index]], 0 * x[pdf >= k[index]], linewidth=4)
+        plt.plot(x[pdf >= k[index]], 0 * x[pdf >= k[index]], linewidth=4, label='HPD')
         plt.plot(x, pdf, linewidth=4)
         plt.xlim([np.minimum(np.min(x), -1), np.maximum(1, np.max(x))])
         plt.plot([self.rope[0], self.rope[0]], [0, 4], 'g--', linewidth=5, label='ROPE')
         plt.plot([self.rope[1], self.rope[1]], [0, 4], 'g--', linewidth=5)
+        plt.gca().set_ylim(bottom=0)
         plt.gca().locator_params(axis='x', numticks=6)
         plt.legend()
         if(var=='pES'):

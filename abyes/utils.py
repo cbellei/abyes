@@ -9,15 +9,12 @@ def print_result(result):
 
     msg = ''
     if result == 1:
-        l = 50
         print()
         msg = 'Result is conclusive: B variant is winner!'
     elif result == -1:
-        l = 50
         print()
         msg = '* Result is conclusive: A variant is winner!'
     elif result == 0:
-        l = 100
         print()
         msg = '* Result is conclusive: A and B variants are effectively equivalent!'
     else:
@@ -25,14 +22,11 @@ def print_result(result):
             print_result(result[0])
             print_result(result[1])
         else:
-            l = 20
             print()
             msg = 'Result is inconclusive.'
 
     print(msg)
     print()
-    print('-'*l)
-
 
 def print_info(info):
     print()

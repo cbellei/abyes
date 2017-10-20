@@ -1,3 +1,4 @@
+*.pyc
 abyes.egg-info
 .idea
 __pycache__/
