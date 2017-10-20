@@ -1,3 +1,5 @@
+.. highlight:: rst
+
 abyes is a Python package for Bayesian A/B Testing.
 
 Installation
