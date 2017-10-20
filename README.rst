@@ -1,17 +1,16 @@
 .. highlight:: rst
 
-aByes is a Python package for Bayesian A/B Testing.
+aByes is a Python package for Bayesian A/B Testing
 
 ^^^^^^^^^^^^
 Installation
 ^^^^^^^^^^^^
-Suggestion: install the package in a virtual environment
 
 * In your target folder, clone the repository with the command::
 
-        git clone `https://github.com/cbellei/abyes.git`
+        git clone https://github.com/cbellei/abyes.git
 
-* Then, inside the same folder::
+* Then, inside the same folder (as always, it is advisable to use a virtual environment)::
 
         pip install .
 
@@ -28,9 +27,11 @@ information).
 
 Limitations
 ===========
-abyes currently:
+Currently, aByes:
+
 * only focuses on conversion rate experiments
 * only allows for two variants at a time to be tested
+
 These shortcomings may be improved in future versions of aByes.
 
 Example
@@ -46,16 +47,17 @@ Example
 
 * This will give the following result::
 
-*** abyes ***
+    *** abyes ***
 
-Method = analytic
-Decision Rule = loss
-Threshold of Caring = 0.01
+    Method = analytic
+    Decision Rule = loss
+    Threshold of Caring = 0.01
 
-Result is conclusive: A variant is winner!
+    Result is conclusive: A variant is winner!
 
 * There are more examples available in the file ``example.py``, which can be run from the root directory with the command::
-python abyes/examples/example.py
+
+    python abyes/examples/example.py
 
 Licence
 =======
