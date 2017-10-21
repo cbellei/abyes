@@ -44,7 +44,6 @@ class AbExp:
         self.resolution = resolution
         self.rope = rope
         self.toc = toc
-        self.data = np.array([])
         self.iterations = iterations
         self.plot = plot
 
@@ -55,10 +54,9 @@ class AbExp:
         ----------
         data : `List(np.array, np.array)`
         """
-        self.data = np.asarray(data, dtype=float)
-        check_size(self.data, dim=2)
+        check_size(data, dim=2)
 
-        posterior = self.find_posterior()
+        posterior = self.find_posterior(data)
 
         decision = self.decision(posterior)
 
@@ -67,16 +65,16 @@ class AbExp:
 
         return decision
 
-    def find_posterior(self):
+    def find_posterior(self, data):
         """
         Find posterior distribution
         """
         if self.method == 'analytic':
-            posterior = self.posterior_analytic()
+            posterior = self.posterior_analytic(data)
         elif self.method == 'mcmc':
-            posterior = self.posterior_mcmc()
+            posterior = self.posterior_mcmc(data)
         elif self.method == 'compare':
-            posterior = [self.posterior_mcmc(), self.posterior_analytic()]
+            posterior = [self.posterior_mcmc(data), self.posterior_analytic(data)]
         else:
             raise Exception('method not recognized')
 
@@ -107,17 +105,17 @@ class AbExp:
 
         return print_result(result)
 
-    def posterior_analytic(self):
+    def posterior_analytic(self, data):
         """
         Find posterior distribution for the analytic method of solution
         :return:
         """
 
-        ca = np.sum(self.data[0])
-        na = len(self.data[0])
+        ca = np.sum(data[0])
+        na = len(data[0])
 
-        cb = np.sum(self.data[1])
-        nb = len(self.data[1])
+        cb = np.sum(data[1])
+        nb = len(data[1])
 
         # find posterior of A and B from analytic solution
         x = np.linspace(0, 1, self.resolution-1)
@@ -150,7 +148,7 @@ class AbExp:
 
         return posterior
 
-    def posterior_mcmc(self):
+    def posterior_mcmc(self, data):
         """
         Find posterior distribution for the numerical method of solution
         :return:
@@ -161,11 +159,11 @@ class AbExp:
             mua = pm.distributions.continuous.Beta('muA', alpha=self.alpha_prior, beta=self.beta_prior)
             mub = pm.distributions.continuous.Beta('muB', alpha=self.alpha_prior, beta=self.beta_prior)
             # likelihoods
-            pm.Bernoulli('likelihoodA', mua, observed=self.data[0])
-            pm.Bernoulli('likelihoodB', mub, observed=self.data[1])
+            pm.Bernoulli('likelihoodA', mua, observed=data[0])
+            pm.Bernoulli('likelihoodB', mub, observed=data[1])
 
             # find distribution of difference
-            pm.Deterministic('delta', mua - mub)
+            pm.Deterministic('delta', mub - mua)
             # find distribution of effect size
             sigma_a = pm.Deterministic('sigmaA', np.sqrt(mua * (1 - mua)))
             sigma_b = pm.Deterministic('sigmaB', np.sqrt(mub * (1 - mub)))
@@ -182,11 +180,11 @@ class AbExp:
         sigma_b = np.histogram(trace['sigmaB'][500:], bins=bins, normed=True)
 
         rvs = trace['delta'][500:]
-        bins = np.linspace(np.min(rvs) - 0.2 * abs(np.min(rvs)), 1.2*np.max(rvs), self.resolution)
+        bins = np.linspace(np.min(rvs) - 0.2 * abs(np.min(rvs)), np.max(rvs) + 0.2 * abs(np.max(rvs)), self.resolution)
         delta = np.histogram(rvs, bins=bins, normed=True)
 
         rvs = trace['effect_size'][500:]
-        bins = np.linspace(np.min(rvs) - 0.2 * abs(np.min(rvs)), 1.2*np.max(rvs), self.resolution)
+        bins = np.linspace(np.min(rvs) - 0.2 * abs(np.min(rvs)), np.max(rvs) + 0.2 * abs(np.max(rvs)), self.resolution)
         pes = np.histogram(rvs, bins=bins, normed=True)
 
         posterior = {'muA': mua, 'muB': mub, 'sigmaA': sigma_a, 'sigmaB': sigma_b,

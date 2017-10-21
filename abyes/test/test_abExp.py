@@ -90,6 +90,83 @@ class TestFunctions(TestCase):
         result2 = exp.expected_loss_decision(posterior, 'avar')
         self.assertEqual(result2, 0.0)
 
+    def test_analytic_method_it(self):
+        """
+        Integration test. Verify that the analytic method of solution works,
+        with scenarios that effectively at 100% give rise to conclusive results.
+        """
+        ns = 100000
+
+        pa = 0.8
+        pb = 0.2
+        data = [np.random.binomial(1, pa, size=ns), np.random.binomial(1, pb, size=ns)]
+
+        exp1 = AbExp(alpha=0.95, method='analytic', rule='rope')
+        posterior = exp1.posterior_analytic(data)
+        hpd1 = exp1.hpd(posterior, 'pES')
+        result1 = exp1.rope_decision(hpd1)
+
+        exp2 = AbExp(alpha=0.95, method='analytic', rule='loss')
+        posterior = exp2.posterior_analytic(data)
+        result2 = exp2.expected_loss_decision(posterior, 'delta')
+
+        pa = 0.2
+        pb = 0.8
+        data = [np.random.binomial(1, pa, size=ns), np.random.binomial(1, pb, size=ns)]
+
+        exp3 = AbExp(alpha=0.95, method='analytic', rule='rope')
+        posterior = exp3.posterior_analytic(data)
+        hpd3 = exp3.hpd(posterior, 'pES')
+        result3 = exp3.rope_decision(hpd3)
+
+        exp4 = AbExp(alpha=0.95, method='analytic', rule='loss')
+        posterior = exp4.posterior_analytic(data)
+        result4 = exp4.expected_loss_decision(posterior, 'delta')
+
+        self.assertEqual(result1, -1.0)
+        self.assertEqual(result2, -1.0)
+        self.assertEqual(result3,  1.0)
+        self.assertEqual(result4,  1.0)
+
+    def test_mcmc_method_it(self):
+        """
+        Integration test. Verify that the mcmc method of solution works,
+        with scenarios that effectively at 100% give rise to conclusive results.
+        """
+        ns = 10000
+
+        pa = 0.8
+        pb = 0.2
+        data = [np.random.binomial(1, pa, size=ns), np.random.binomial(1, pb, size=ns)]
+
+        exp1 = AbExp(alpha=0.95, method='mcmc', rule='rope', iterations=2500)
+        posterior = exp1.posterior_mcmc(data)
+        hpd1 = exp1.hpd(posterior, 'pES')
+        result1 = exp1.rope_decision(hpd1)
+
+        exp2 = AbExp(alpha=0.95, method='mcmc', rule='loss', iterations=2500)
+        posterior = exp2.posterior_mcmc(data)
+        result2 = exp2.expected_loss_decision(posterior, 'delta')
+
+        pa = 0.2
+        pb = 0.8
+        data = [np.random.binomial(1, pa, size=ns), np.random.binomial(1, pb, size=ns)]
+
+        exp3 = AbExp(alpha=0.95, method='mcmc', rule='rope', iterations=2500)
+        posterior = exp1.posterior_mcmc(data)
+        hpd3 = exp3.hpd(posterior, 'pES')
+        result3 = exp3.rope_decision(hpd3)
+
+        exp4 = AbExp(alpha=0.95, method='mcmc', rule='loss', iterations=2500)
+        posterior = exp4.posterior_mcmc(data)
+        result4 = exp4.expected_loss_decision(posterior, 'delta')
+
+        self.assertEqual(result1, -1.0)
+        self.assertEqual(result2, -1.0)
+        self.assertEqual(result3,  1.0)
+        self.assertEqual(result4,  1.0)
+
+
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stderr)
     logging.getLogger("TestFunctions.test_hpd").setLevel(logging.DEBUG)

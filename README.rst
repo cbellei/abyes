@@ -30,9 +30,9 @@ Limitations
 Currently, aByes:
 
 * only focuses on conversion rate experiments
-* only allows for two variants at a time to be tested
+* allows for only two variants at a time to be tested
 
-These shortcomings may be improved in future versions of aByes.
+These shortcomings may be improved in future versions of aByes. (Feel free to fork the project and make these improvements yourself!)
 
 Example
 =======
