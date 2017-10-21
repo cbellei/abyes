@@ -103,7 +103,7 @@ class TestFunctions(TestCase):
 
         exp1 = AbExp(alpha=0.95, method='analytic', rule='rope')
         posterior = exp1.posterior_analytic(data)
-        hpd1 = exp1.hpd(posterior, 'pES')
+        hpd1 = exp1.hpd(posterior, 'es')
         result1 = exp1.rope_decision(hpd1)
 
         exp2 = AbExp(alpha=0.95, method='analytic', rule='loss')
@@ -116,7 +116,7 @@ class TestFunctions(TestCase):
 
         exp3 = AbExp(alpha=0.95, method='analytic', rule='rope')
         posterior = exp3.posterior_analytic(data)
-        hpd3 = exp3.hpd(posterior, 'pES')
+        hpd3 = exp3.hpd(posterior, 'es')
         result3 = exp3.rope_decision(hpd3)
 
         exp4 = AbExp(alpha=0.95, method='analytic', rule='loss')
@@ -141,7 +141,7 @@ class TestFunctions(TestCase):
 
         exp1 = AbExp(alpha=0.95, method='mcmc', rule='rope', iterations=2500)
         posterior = exp1.posterior_mcmc(data)
-        hpd1 = exp1.hpd(posterior, 'pES')
+        hpd1 = exp1.hpd(posterior, 'es')
         result1 = exp1.rope_decision(hpd1)
 
         exp2 = AbExp(alpha=0.95, method='mcmc', rule='loss', iterations=2500)
@@ -154,7 +154,7 @@ class TestFunctions(TestCase):
 
         exp3 = AbExp(alpha=0.95, method='mcmc', rule='rope', iterations=2500)
         posterior = exp1.posterior_mcmc(data)
-        hpd3 = exp3.hpd(posterior, 'pES')
+        hpd3 = exp3.hpd(posterior, 'es')
         result3 = exp3.rope_decision(hpd3)
 
         exp4 = AbExp(alpha=0.95, method='mcmc', rule='loss', iterations=2500)
