@@ -48,7 +48,7 @@ Example
     import numpy as np
 
     data = [np.random.binomial(1, 0.5, size=10000), np.random.binomial(1, 0.3, size=10000)]
-    exp = ab.AbExp(alpha=0.95, method='analytic', rule='loss')
+    exp = ab.AbExp(alpha=0.95, method='analytic', decision_var = 'lift', rule='loss')
     exp.experiment(data)
 
 * This will give the following result::
@@ -58,6 +58,7 @@ Example
     Method = analytic
     Decision Rule = loss
     Threshold of Caring = 0.01
+    Decision Variable = lift
 
     Result is conclusive: A variant is winner!
 
