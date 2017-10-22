@@ -3,6 +3,7 @@ from scipy.stats import beta
 from .utils import check_size, print_result, print_info
 import matplotlib.pyplot as plt
 from scipy.interpolate import UnivariateSpline
+import warnings
 import pymc3 as pm
 
 
@@ -49,18 +50,12 @@ class AbExp:
         self.decision_var = decision_var
 
         if(method == 'compare' and not rule == 'rope'):
-            print('-- WARNING --')
-            print('For "compare" method, only ROPE decision rule is currently supported.')
-            print('Changing rule to ROPE.')
-            print()
+            warnings.warn('For "compare" method, only ROPE decision rule is currently supported. Setting rule to ROPE.')
             self.rule = 'rope'
 
-        if(rule == 'loss' and not decision_var == 'es'):
-            print('-- WARNING --')
-            print('For "loss" decision rule, only Effect Size decision variable is currently supported.')
-            print('Changing decision_var to "es".')
-            print()
-            self.decision_var = 'es'
+        if(rule == 'loss' and decision_var == 'es'):
+            warnings.warn('For "loss" decision rule, only "lift" decision variable is currently supported. Setting decision_var to "lift".')
+            self.decision_var = 'lift'
 
     def experiment(self, data):
         '''
@@ -118,7 +113,7 @@ class AbExp:
                 hpd = self.hpd(posterior, self.decision_var)
                 result = self.rope_decision(hpd)
             elif self.rule == 'loss':
-                result = self.expected_loss_decision(posterior, 'delta')
+                result = self.expected_loss_decision(posterior, self.decision_var)
 
         print_info(self)
 
@@ -150,7 +145,7 @@ class AbExp:
 
         rvs = b_rvs - a_rvs
         bins = np.linspace(np.min(rvs) - 0.2 * abs(np.min(rvs)), np.max(rvs) + 0.2 * abs(np.max(rvs)), self.resolution)
-        delta = np.histogram(rvs, bins=bins, normed=True)
+        lift = np.histogram(rvs, bins=bins, normed=True)
 
         bins = np.linspace(0, 1, self.resolution)
         sigma_a_rvs = np.sqrt(a_rvs * (1 - a_rvs))
@@ -163,7 +158,7 @@ class AbExp:
         pes = np.histogram(rvs, bins=bins, normed=True)
 
         posterior = {'muA': pa, 'muB': pb, 'psigma_a': psigma_a, 'psigma_b': psigma_b,
-                     'delta': delta, 'es': pes, 'prior': self.prior()}
+                     'lift': lift, 'es': pes, 'prior': self.prior()}
 
         return posterior
 
@@ -182,7 +177,7 @@ class AbExp:
             pm.Bernoulli('likelihoodB', mub, observed=data[1])
 
             # find distribution of difference
-            pm.Deterministic('delta', mub - mua)
+            pm.Deterministic('lift', mub - mua)
             # find distribution of effect size
             sigma_a = pm.Deterministic('sigmaA', np.sqrt(mua * (1 - mua)))
             sigma_b = pm.Deterministic('sigmaB', np.sqrt(mub * (1 - mub)))
@@ -198,16 +193,16 @@ class AbExp:
         sigma_a = np.histogram(trace['sigmaA'][500:], bins=bins, normed=True)
         sigma_b = np.histogram(trace['sigmaB'][500:], bins=bins, normed=True)
 
-        rvs = trace['delta'][500:]
+        rvs = trace['lift'][500:]
         bins = np.linspace(np.min(rvs) - 0.2 * abs(np.min(rvs)), np.max(rvs) + 0.2 * abs(np.max(rvs)), self.resolution)
-        delta = np.histogram(rvs, bins=bins, normed=True)
+        lift = np.histogram(rvs, bins=bins, normed=True)
 
         rvs = trace['effect_size'][500:]
         bins = np.linspace(np.min(rvs) - 0.2 * abs(np.min(rvs)), np.max(rvs) + 0.2 * abs(np.max(rvs)), self.resolution)
         pes = np.histogram(rvs, bins=bins, normed=True)
 
         posterior = {'muA': mua, 'muB': mub, 'sigmaA': sigma_a, 'sigmaB': sigma_b,
-                     'delta': delta, 'es': pes, 'prior': self.prior()}
+                     'lift': lift, 'es': pes, 'prior': self.prior()}
 
         return posterior
 
@@ -257,7 +252,6 @@ class AbExp:
         '''
         Calculate expected loss and apply decision rule
         '''
-        print('var = ', var, type(var), posterior.keys)
         dl = posterior[var][1]
         dl = 0.5 * (dl[0:-1] + dl[1:])
         fdl = posterior[var][0]
@@ -281,7 +275,7 @@ class AbExp:
             plt.legend()
 
             plt.subplot(1,2,2)
-            plt.plot(dl, fdl, 'b', lw=3, label=r'$f(\mu_B - \mu_A)$')
+            plt.plot(dl, fdl, 'b', lw=3, label=r'f$(\mu_B - \mu_A)$')
             plt.plot([ela, ela], [0, 0.3*np.max(fdl)], 'r', lw=3, label='A: Expected Loss')
             plt.plot([elb, elb], [0, 0.3*np.max(fdl)], 'c', lw=3, label='B: Expected Loss')
             plt.plot([self.toc, self.toc], [0, 0.3*np.max(fdl)], 'k--', lw=3, label='Threshold of Caring')
@@ -308,7 +302,10 @@ class AbExp:
         label2 = r'$f(\mu_B)$'
         label3 = 'HPD'
         label4 = 'ROPE'
-        label = ''
+        if var=='es':
+            label = '$f$(ES)'
+        elif var=='lift':
+            label = r'$f(\mu_B - \mu_A)$'
         ls = '-'
 
         for arg in args:
@@ -345,10 +342,10 @@ class AbExp:
 
         plt.subplot(1, 2, 2)
         pdf = posterior[var][0]
-        plt.plot(x[pdf >= k[index]], 0 * x[pdf >= k[index]], linewidth=4, label=label3)
-        line, = plt.plot(x, pdf, lw=3, ls=ls, label=label)
+        line, = plt.plot(x, pdf, lw=3, ls='-', label=label)
         if 'clr' in locals():
             line.set_color(clr)
+        plt.plot(x[pdf >= k[index]], 0 * x[pdf >= k[index]], linewidth=4, label=label3)
         plt.xlim([np.minimum(np.min(x), -1), np.maximum(1, np.max(x))])
         plt.plot([self.rope[0], self.rope[0]], [0, 4], 'g--', linewidth=5, label=label4)
         plt.plot([self.rope[1], self.rope[1]], [0, 4], 'g--', linewidth=5)
@@ -358,5 +355,6 @@ class AbExp:
         if(var=='es'):
             plt.xlabel(r'$(\mu_B-\mu_A)/\sqrt{\sigma_A^2 + \sigma_B^2)}$')
             plt.title('Effect Size')
-        elif(var=='delta'):
+        elif(var=='lift'):
             plt.xlabel(r'$\mu_B-\mu_A$')
+            plt.title(r'Lift')

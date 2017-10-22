@@ -39,4 +39,5 @@ def print_info(info):
         print('Rope = %s' % str(info.rope))
     elif info.rule== 'loss':
         print('Threshold of Caring = %s' % info.toc)
+    print('Decision Variable = %s' %info.decision_var)
 

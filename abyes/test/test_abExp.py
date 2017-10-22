@@ -101,27 +101,27 @@ class TestFunctions(TestCase):
         pb = 0.2
         data = [np.random.binomial(1, pa, size=ns), np.random.binomial(1, pb, size=ns)]
 
-        exp1 = AbExp(alpha=0.95, method='analytic', rule='rope')
+        exp1 = AbExp(alpha=0.95, method='analytic', rule='rope', decision_var='es')
         posterior = exp1.posterior_analytic(data)
         hpd1 = exp1.hpd(posterior, 'es')
         result1 = exp1.rope_decision(hpd1)
 
-        exp2 = AbExp(alpha=0.95, method='analytic', rule='loss')
+        exp2 = AbExp(alpha=0.95, method='analytic', rule='loss', decision_var='lift')
         posterior = exp2.posterior_analytic(data)
-        result2 = exp2.expected_loss_decision(posterior, 'delta')
+        result2 = exp2.expected_loss_decision(posterior, 'lift')
 
         pa = 0.2
         pb = 0.8
         data = [np.random.binomial(1, pa, size=ns), np.random.binomial(1, pb, size=ns)]
 
-        exp3 = AbExp(alpha=0.95, method='analytic', rule='rope')
+        exp3 = AbExp(alpha=0.95, method='analytic', rule='rope', decision_var='es')
         posterior = exp3.posterior_analytic(data)
         hpd3 = exp3.hpd(posterior, 'es')
         result3 = exp3.rope_decision(hpd3)
 
-        exp4 = AbExp(alpha=0.95, method='analytic', rule='loss')
+        exp4 = AbExp(alpha=0.95, method='analytic', rule='loss', decision_var='lift')
         posterior = exp4.posterior_analytic(data)
-        result4 = exp4.expected_loss_decision(posterior, 'delta')
+        result4 = exp4.expected_loss_decision(posterior, 'lift')
 
         self.assertEqual(result1, -1.0)
         self.assertEqual(result2, -1.0)
@@ -139,27 +139,27 @@ class TestFunctions(TestCase):
         pb = 0.2
         data = [np.random.binomial(1, pa, size=ns), np.random.binomial(1, pb, size=ns)]
 
-        exp1 = AbExp(alpha=0.95, method='mcmc', rule='rope', iterations=2500)
+        exp1 = AbExp(alpha=0.95, method='mcmc', rule='rope', decision_var='es', iterations=2500)
         posterior = exp1.posterior_mcmc(data)
         hpd1 = exp1.hpd(posterior, 'es')
         result1 = exp1.rope_decision(hpd1)
 
-        exp2 = AbExp(alpha=0.95, method='mcmc', rule='loss', iterations=2500)
+        exp2 = AbExp(alpha=0.95, method='mcmc', rule='loss', decision_var='lift', iterations=2500)
         posterior = exp2.posterior_mcmc(data)
-        result2 = exp2.expected_loss_decision(posterior, 'delta')
+        result2 = exp2.expected_loss_decision(posterior, 'lift')
 
         pa = 0.2
         pb = 0.8
         data = [np.random.binomial(1, pa, size=ns), np.random.binomial(1, pb, size=ns)]
 
-        exp3 = AbExp(alpha=0.95, method='mcmc', rule='rope', iterations=2500)
+        exp3 = AbExp(alpha=0.95, method='mcmc', rule='rope', decision_var='es', iterations=2500)
         posterior = exp1.posterior_mcmc(data)
         hpd3 = exp3.hpd(posterior, 'es')
         result3 = exp3.rope_decision(hpd3)
 
-        exp4 = AbExp(alpha=0.95, method='mcmc', rule='loss', iterations=2500)
+        exp4 = AbExp(alpha=0.95, method='mcmc', rule='loss', decision_var='lift', iterations=2500)
         posterior = exp4.posterior_mcmc(data)
-        result4 = exp4.expected_loss_decision(posterior, 'delta')
+        result4 = exp4.expected_loss_decision(posterior, 'lift')
 
         self.assertEqual(result1, -1.0)
         self.assertEqual(result2, -1.0)
