@@ -34,8 +34,7 @@ How to use aByes
 The main steps to run the analysis of an A/B experiment are:
 
 * Aggregate the data for the "A" and "B" variations in a List of numpy arrays
-* Decide how to do the analysis. Options are: 1. analytic solution; 2. MCMC solution (using PyMC3);
-3. compare the analytic and MCMC solutions
+* Decide how to do the analysis. Options are: 1. analytic solution; 2. MCMC solution (using PyMC3); 3. compare the analytic and MCMC solutions
 * Set decision rule. Options are: 1. ROPE method; 2. Expected Loss method
 * Set parameter to use for the decision. Options are: 1. Lift (difference in means); 2. Effect size
 
