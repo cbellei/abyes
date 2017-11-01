@@ -52,7 +52,9 @@ Example
     exp.experiment(data)
 
 * This will plot the posterior distributions::
+
    .. image:: https://raw.githubusercontent.com/cbellei/abyes/master/abyes/examples/example.png
+        :width: 450px
 
 * It will then give the following result::
 
