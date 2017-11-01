@@ -35,7 +35,7 @@ def print_info(info):
     print('Method = %s' % info.method)
     print('Decision Rule = %s' % info.rule)
     if info.rule== 'rope':
-        print('Alpa = %s' % info.alpha)
+        print('Alpha = %s' % info.alpha)
         print('Rope = %s' % str(info.rope))
     elif info.rule== 'loss':
         print('Threshold of Caring = %s' % info.toc)

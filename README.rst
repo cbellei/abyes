@@ -47,20 +47,24 @@ Example
     import abyes as ab
     import numpy as np
 
-    data = [np.random.binomial(1, 0.5, size=10000), np.random.binomial(1, 0.3, size=10000)]
-    exp = ab.AbExp(alpha=0.95, method='analytic', decision_var = 'lift', rule='loss')
+    data = [np.random.binomial(1, 0.4, size=10000), np.random.binomial(1, 0.5, size=10000)]
+    exp = ab.AbExp(method='analytic', decision_var = 'lift', rule='rope', rope=(-0.01,0.01), plot=True)
     exp.experiment(data)
 
-* This will give the following result::
+* This will plot the posterior distributions::
+![alt tag](https://raw.githubusercontent.com/cbellei/abyes/master/abyes/examples/example.png)
+
+* It will then give the following result::
 
     *** abyes ***
 
     Method = analytic
-    Decision Rule = loss
-    Threshold of Caring = 0.01
+    Decision Rule = rope
+    Alpha = 0.95
+    Rope = (-0.01, 0.01)
     Decision Variable = lift
 
-    Result is conclusive: A variant is winner!
+    Result is conclusive: B variant is winner!
 
 * There are many more examples available in the file ``example.py``, which can be run from the root directory with the command::
 

@@ -2,13 +2,12 @@ import numpy as np
 from scipy.stats import beta
 from .utils import check_size, print_result, print_info
 import matplotlib.pyplot as plt
-from scipy.interpolate import UnivariateSpline
 import warnings
 import pymc3 as pm
 
 
 class AbExp:
-    '''
+    """
     Define a Bayesian A/B Test on conversion rate experimental data.
     Parameters
     ----------
@@ -32,7 +31,7 @@ class AbExp:
     toc : `float`
         define threshold of caring
         [default: 0.01]
-    '''
+    """
     def __init__(self, method='analytic', rule='rope',
                  alpha=0.95, alpha_prior=1, beta_prior=1,
                  resolution=500, rope=(-0.1, 0.1), toc=1.e-2,
@@ -49,36 +48,36 @@ class AbExp:
         self.plot = plot
         self.decision_var = decision_var
 
-        if(method == 'compare' and not rule == 'rope'):
+        if method == 'compare' and not rule == 'rope':
             warnings.warn('For "compare" method, only ROPE decision rule is currently supported. Setting rule to ROPE.')
             self.rule = 'rope'
 
-        if(rule == 'loss' and decision_var == 'es'):
+        if rule == 'loss' and decision_var == 'es':
             warnings.warn('For "loss" decision rule, only "lift" decision variable is currently supported. Setting decision_var to "lift".')
             self.decision_var = 'lift'
 
     def experiment(self, data):
-        '''
+        """
         Run experiment with data provided
         Parameters
         ----------
         data : `List(np.array, np.array)`
-        '''
+        """
         check_size(data, dim=2)
 
         posterior = self.find_posterior(data)
 
         decision = self.decision(posterior)
 
-        if (plt.plot):
+        if plt.plot:
             plt.show()
 
         return decision
 
     def find_posterior(self, data):
-        '''
+        """
         Find posterior distribution
-        '''
+        """
         if self.method == 'analytic':
             posterior = self.posterior_analytic(data)
         elif self.method == 'mcmc':
@@ -91,39 +90,37 @@ class AbExp:
         return posterior
 
     def decision(self, posterior):
-        '''
+        """
         Make decision on the experiment
-        :param posterior:
-        :return:
-        '''
+        """
         if self.plot:
             plt.figure(figsize=(9, 6))
 
         if self.method == 'compare':
-            hpd1 = self.hpd(posterior[0], self.decision_var, {'clr':'r', 'label1':'analytic', 'label2':'',
-                                                  'label3':'', 'label4':'', 'label':'analytic'})
+            hpd1 = self.hpd(posterior[0], self.decision_var, {'clr': 'r', 'label1': 'analytic', 'label2': '',
+                                                              'label3': '', 'label4': '', 'label': 'analytic'})
             result1 = self.rope_decision(hpd1)
 
-            hpd2 = self.hpd(posterior[1], self.decision_var, {'clr':'k', 'ls':'--', 'label1':'mcmc',
-                                                  'label2':'', 'label3':'', 'label4':'', 'label':'mcmc'})
+            hpd2 = self.hpd(posterior[1], self.decision_var, {'clr': 'k', 'ls': '--', 'label1': 'mcmc',
+                                                              'label2': '', 'label3': '', 'label4': '', 'label': 'mcmc'})
             result2 = self.rope_decision(hpd2)
             result = [result1, result2]
         else:
             if self.rule == 'rope':
                 hpd = self.hpd(posterior, self.decision_var)
                 result = self.rope_decision(hpd)
-            elif self.rule == 'loss':
+            else:
                 result = self.expected_loss_decision(posterior, self.decision_var)
 
-        print_info(self)
+        if not(self.method == 'compare'):
+            print_info(self)
 
         return print_result(result)
 
     def posterior_analytic(self, data):
-        '''
+        """
         Find posterior distribution for the analytic method of solution
-        :return:
-        '''
+        """
 
         ca = np.sum(data[0])
         na = len(data[0])
@@ -163,10 +160,9 @@ class AbExp:
         return posterior
 
     def posterior_mcmc(self, data):
-        '''
+        """
         Find posterior distribution for the numerical method of solution
-        :return:
-        '''
+        """
 
         with pm.Model() as ab_model:
             # priors
@@ -207,16 +203,15 @@ class AbExp:
         return posterior
 
     def prior(self):
-        '''
+        """
         Find out prior distribution
-        :return:
-        '''
+        """
         return [beta.pdf(x, self.alpha_prior, self.beta_prior) for x in np.linspace(0, 1, self.resolution)]
 
-    def hpd(self, posterior, var, *type):
-        '''
+    def hpd(self, posterior, var, *parameters):
+        """
         Find out High Posterior Density Region
-        '''
+        """
 
         bins = posterior[var][1]
         x = 0.5 * (bins[0:-1] + bins[1:])
@@ -226,16 +221,14 @@ class AbExp:
         index = np.argwhere(np.abs(area_above - self.alpha) == np.min(np.abs(area_above - self.alpha)))[0]
 
         if self.plot:
-            self.plot_rope_posterior(index, k, x, posterior, var, *type)
+            self.plot_rope_posterior(index, k, x, posterior, var, *parameters)
 
         return x[pdf >= k[index]]
 
     def rope_decision(self, hpd):
-        '''
+        """
         Apply decision rule for ROPE method
-        :param hpd:
-        :return:
-        '''
+        """
 
         if all(h < min(self.rope) for h in hpd):
             result = -1
@@ -249,9 +242,9 @@ class AbExp:
         return result
 
     def expected_loss_decision(self, posterior, var):
-        '''
+        """
         Calculate expected loss and apply decision rule
-        '''
+        """
         dl = posterior[var][1]
         dl = 0.5 * (dl[0:-1] + dl[1:])
         fdl = posterior[var][0]
@@ -262,7 +255,7 @@ class AbExp:
         elb = np.trapz(intb, dl)
 
         if self.plot:
-            plt.subplot(1,2,1)
+            plt.subplot(1, 2, 1)
             b = posterior['muA'][1]
             plt.plot(0.5*(b[0:-1]+b[1:]), posterior['muA'][0], lw=2, label=r'$f(\mu_A)$')
             b = posterior['muB'][1]
@@ -274,7 +267,7 @@ class AbExp:
             plt.gca().set_ylim(bottom=0)
             plt.legend()
 
-            plt.subplot(1,2,2)
+            plt.subplot(1, 2, 2)
             plt.plot(dl, fdl, 'b', lw=3, label=r'f$(\mu_B - \mu_A)$')
             plt.plot([ela, ela], [0, 0.3*np.max(fdl)], 'r', lw=3, label='A: Expected Loss')
             plt.plot([elb, elb], [0, 0.3*np.max(fdl)], 'c', lw=3, label='B: Expected Loss')
@@ -302,9 +295,9 @@ class AbExp:
         label2 = r'$f(\mu_B)$'
         label3 = 'HPD'
         label4 = 'ROPE'
-        if var=='es':
+        if var == 'es':
             label = '$f$(ES)'
-        elif var=='lift':
+        elif var == 'lift':
             label = r'$f(\mu_B - \mu_A)$'
         ls = '-'
 
@@ -334,7 +327,7 @@ class AbExp:
         if 'clr' in locals():
             line.set_color(clr)
         plt.xlabel('$\mu_A,\  \mu_B$')
-        plt.xlim([0,1])
+        plt.xlim([0, 1])
         plt.title('Conversion Rate')
         plt.gca().set_ylim(bottom=0)
         plt.locator_params(nticks=6)
@@ -352,9 +345,9 @@ class AbExp:
         plt.gca().set_ylim(bottom=0)
         plt.gca().locator_params(axis='x', numticks=6)
         plt.legend()
-        if(var=='es'):
+        if var == 'es':
             plt.xlabel(r'$(\mu_B-\mu_A)/\sqrt{\sigma_A^2 + \sigma_B^2)}$')
             plt.title('Effect Size')
-        elif(var=='lift'):
+        elif var == 'lift':
             plt.xlabel(r'$\mu_B-\mu_A$')
             plt.title(r'Lift')
