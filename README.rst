@@ -42,7 +42,7 @@ These and many more examples and instructions can be found in this blogpost.
 
 Example
 =======
-* In ipython, type::
+* In IPython, type::
 
     import abyes as ab
     import numpy as np
