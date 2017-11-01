@@ -51,7 +51,7 @@ Example
     exp = ab.AbExp(method='analytic', decision_var = 'lift', rule='rope', rope=(-0.01,0.01), plot=True)
     exp.experiment(data)
 
-* This will plot the posterior distributions::
+* This will plot the posterior distribution:
    .. image:: https://raw.githubusercontent.com/cbellei/abyes/master/abyes/examples/example.png
 
 * It will then give the following result::
