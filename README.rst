@@ -8,6 +8,8 @@ aByes is a Python package for Bayesian A/B Testing, which supports two main deci
 * Region Of Practical Equivalence (as in the paper `Bayesian estimation supersedes the t-test <http://www.indiana.edu/~kruschke/articles/Kruschke2013JEPG.pdf>`__, J. K. Kruschke, Journal of Experimental Psychology, 2012)
 * Expected Loss (as discussed in `Bayesian A/B Testing at VWO <https://cdn2.hubspot.net/hubfs/310840/VWO_SmartStats_technical_whitepaper.pdf>`__, C. Stucchio)
 
+A lot of the underlying theory is discussed in `this blog post <http://www.claudiobellei.com/2017/11/02/bayesian-AB-testing/>`__.
+
 Installation
 ============
 * In your target folder, clone the repository with the command::
