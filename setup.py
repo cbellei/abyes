@@ -3,7 +3,7 @@ from setuptools import setup
 setup(name='abyes',
       version='0.1.0',
       description='AB Testing using Bayesian statistics',
-      url='http://github.com/storborg/funniest',
+      url='https://github.com/cbellei/abyes',
       author='Claudio Bellei',
       author_email='',
       license='OSI Approved Apache Software License',
