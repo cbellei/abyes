@@ -121,6 +121,7 @@ class AbExp:
             if not(self.method == 'compare'):
                 print_info(self)
             print_result(result)
+        return result
 
     def posterior_analytic(self, data):
         """
