@@ -99,7 +99,7 @@ class AbExp:
         Make decision on the experiment
         """
         if self.plot:
-            plt.figure(figsize=(9, 6))
+            plt.figure(figsize=(15, 5))
 
         if self.method == 'compare':
             hpd1 = self.hpd(posterior[0], self.decision_var, {'clr': 'r', 'label1': 'analytic', 'label2': '',
