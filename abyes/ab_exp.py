@@ -31,11 +31,15 @@ class AbExp:
     toc : `float`
         define threshold of caring
         [default: 0.01]
+    verbose : `bool`
+        whether or not to print the test results
+        [default: True]
     """
     def __init__(self, method='analytic', rule='rope',
                  alpha=0.95, alpha_prior=1, beta_prior=1,
                  resolution=500, rope=(-0.1, 0.1), toc=1.e-2,
-                 iterations=5000, plot=False, decision_var='es'):
+                 iterations=5000, plot=False, decision_var='es',
+                 verbose=True):
         self.method = method
         self.rule = rule
         self.alpha = alpha
@@ -47,6 +51,7 @@ class AbExp:
         self.iterations = iterations
         self.plot = plot
         self.decision_var = decision_var
+        self.verbose = verbose
 
         if method == 'compare' and not rule == 'rope':
             warnings.warn('For "compare" method, only ROPE decision rule is currently supported. Setting rule to ROPE.')
@@ -112,10 +117,10 @@ class AbExp:
             else:
                 result = self.expected_loss_decision(posterior, self.decision_var)
 
-        if not(self.method == 'compare'):
-            print_info(self)
-
-        return print_result(result)
+        if self.verbose:
+            if not(self.method == 'compare'):
+                print_info(self)
+            print_result(result)
 
     def posterior_analytic(self, data):
         """
