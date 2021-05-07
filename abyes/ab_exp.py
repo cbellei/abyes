@@ -31,11 +31,15 @@ class AbExp:
     toc : `float`
         define threshold of caring
         [default: 0.01]
+    verbose : `bool`
+        whether or not to print the test results
+        [default: True]
     """
     def __init__(self, method='analytic', rule='rope',
                  alpha=0.95, alpha_prior=1, beta_prior=1,
                  resolution=500, rope=(-0.1, 0.1), toc=1.e-2,
-                 iterations=5000, plot=False, decision_var='es'):
+                 iterations=5000, plot=False, decision_var='es',
+                 verbose=True):
         self.method = method
         self.rule = rule
         self.alpha = alpha
@@ -47,6 +51,7 @@ class AbExp:
         self.iterations = iterations
         self.plot = plot
         self.decision_var = decision_var
+        self.verbose = verbose
 
         if method == 'compare' and not rule == 'rope':
             warnings.warn('For "compare" method, only ROPE decision rule is currently supported. Setting rule to ROPE.')
@@ -94,7 +99,7 @@ class AbExp:
         Make decision on the experiment
         """
         if self.plot:
-            plt.figure(figsize=(9, 6))
+            plt.figure(figsize=(15, 5))
 
         if self.method == 'compare':
             hpd1 = self.hpd(posterior[0], self.decision_var, {'clr': 'r', 'label1': 'analytic', 'label2': '',
@@ -112,10 +117,11 @@ class AbExp:
             else:
                 result = self.expected_loss_decision(posterior, self.decision_var)
 
-        if not(self.method == 'compare'):
-            print_info(self)
-
-        return print_result(result)
+        if self.verbose:
+            if not(self.method == 'compare'):
+                print_info(self)
+            print_result(result)
+        return result
 
     def posterior_analytic(self, data):
         """
@@ -142,17 +148,17 @@ class AbExp:
 
         rvs = b_rvs - a_rvs
         bins = np.linspace(np.min(rvs) - 0.2 * abs(np.min(rvs)), np.max(rvs) + 0.2 * abs(np.max(rvs)), self.resolution)
-        lift = np.histogram(rvs, bins=bins, normed=True)
+        lift = np.histogram(rvs, bins=bins, density=True)
 
         bins = np.linspace(0, 1, self.resolution)
         sigma_a_rvs = np.sqrt(a_rvs * (1 - a_rvs))
         sigma_b_rvs = np.sqrt(b_rvs * (1 - b_rvs))
-        psigma_a = np.histogram(sigma_a_rvs, bins=bins, normed=True)
-        psigma_b = np.histogram(sigma_b_rvs, bins=bins, normed=True)
+        psigma_a = np.histogram(sigma_a_rvs, bins=bins, density=True)
+        psigma_b = np.histogram(sigma_b_rvs, bins=bins, density=True)
 
         rvs = (b_rvs - a_rvs) / np.sqrt(0.5 * (sigma_a_rvs**2 + sigma_b_rvs**2))
         bins = np.linspace(np.min(rvs) - 0.2 * abs(np.min(rvs)), np.max(rvs) + 0.2 * abs(np.max(rvs)), self.resolution)
-        pes = np.histogram(rvs, bins=bins, normed=True)
+        pes = np.histogram(rvs, bins=bins, density=True)
 
         posterior = {'muA': pa, 'muB': pb, 'psigma_a': psigma_a, 'psigma_b': psigma_b,
                      'lift': lift, 'es': pes, 'prior': self.prior()}
@@ -184,18 +190,18 @@ class AbExp:
             trace = pm.sample(self.iterations, step=step, start=start)
 
         bins = np.linspace(0, 1, self.resolution)
-        mua = np.histogram(trace['muA'][500:], bins=bins, normed=True)
-        mub = np.histogram(trace['muB'][500:], bins=bins, normed=True)
-        sigma_a = np.histogram(trace['sigmaA'][500:], bins=bins, normed=True)
-        sigma_b = np.histogram(trace['sigmaB'][500:], bins=bins, normed=True)
+        mua = np.histogram(trace['muA'][500:], bins=bins, density=True)
+        mub = np.histogram(trace['muB'][500:], bins=bins, density=True)
+        sigma_a = np.histogram(trace['sigmaA'][500:], bins=bins, density=True)
+        sigma_b = np.histogram(trace['sigmaB'][500:], bins=bins, density=True)
 
         rvs = trace['lift'][500:]
         bins = np.linspace(np.min(rvs) - 0.2 * abs(np.min(rvs)), np.max(rvs) + 0.2 * abs(np.max(rvs)), self.resolution)
-        lift = np.histogram(rvs, bins=bins, normed=True)
+        lift = np.histogram(rvs, bins=bins, density=True)
 
         rvs = trace['effect_size'][500:]
         bins = np.linspace(np.min(rvs) - 0.2 * abs(np.min(rvs)), np.max(rvs) + 0.2 * abs(np.max(rvs)), self.resolution)
-        pes = np.histogram(rvs, bins=bins, normed=True)
+        pes = np.histogram(rvs, bins=bins, density=True)
 
         posterior = {'muA': mua, 'muB': mub, 'sigmaA': sigma_a, 'sigmaB': sigma_b,
                      'lift': lift, 'es': pes, 'prior': self.prior()}
@@ -263,7 +269,7 @@ class AbExp:
             plt.xlabel('$\mu_A,\  \mu_B$')
             plt.xlim([0, 1])
             plt.title('Conversion Rate')
-            plt.locator_params(nticks=6)
+            plt.locator_params(nbins=6)
             plt.gca().set_ylim(bottom=0)
             plt.legend()
 
@@ -275,7 +281,7 @@ class AbExp:
             plt.xlabel(r'$\mu_B-\mu_A$')
             plt.title('Expected Loss')
             plt.gca().set_ylim(bottom=0)
-            plt.gca().locator_params(axis='x', numticks=6)
+            plt.gca().locator_params(axis='x', nbins=6)
             plt.legend()
 
         if ela <= self.toc and elb <= self.toc:
@@ -330,7 +336,7 @@ class AbExp:
         plt.xlim([0, 1])
         plt.title('Conversion Rate')
         plt.gca().set_ylim(bottom=0)
-        plt.locator_params(nticks=6)
+        plt.locator_params(nbins=6)
         plt.legend()
 
         plt.subplot(1, 2, 2)
@@ -343,7 +349,7 @@ class AbExp:
         plt.plot([self.rope[0], self.rope[0]], [0, 4], 'g--', linewidth=5, label=label4)
         plt.plot([self.rope[1], self.rope[1]], [0, 4], 'g--', linewidth=5)
         plt.gca().set_ylim(bottom=0)
-        plt.gca().locator_params(axis='x', numticks=6)
+        plt.gca().locator_params(axis='x', nbins=6)
         plt.legend()
         if var == 'es':
             plt.xlabel(r'$(\mu_B-\mu_A)/\sqrt{\sigma_A^2 + \sigma_B^2)}$')
