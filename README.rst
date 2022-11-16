@@ -10,16 +10,19 @@ aByes is a Python package for Bayesian A/B Testing, which supports two main deci
 
 A lot of the underlying theory is discussed in `this blog post <http://www.claudiobellei.com/2017/11/02/bayesian-AB-testing/>`__.
 
-Installation
+Installation on a Vertex.ai Workbench
 ============
-* In your target folder, clone the repository with the command::
+* Spin up a new user managed notebook: https://console.cloud.google.com/vertex-ai/workbench/ (TODO: Terraform + docker image, this will replace the install steps below)
+* Connect to the notebook
+* Install abyes
 
-        git clone https://github.com/cbellei/abyes.git
-
-* Then, inside the same folder (as always, it is advisable to use a virtual environment)::
-
-        pip install .
-
+```
+# Open a terminal. 
+git clone https://github.com/cbellei/abyes.git
+cd abyes
+make init
+```
+* Restart the notebook kernal (under `Kernel` menu)
 * To check that the package has been installed, in the Python shell type::
 
         import abyes
